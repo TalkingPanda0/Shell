@@ -11,7 +11,7 @@ getsuffix () {
 }
 while :; do
 	rank=$(curl -s https://scoresaber.com/u/$user | grep "\"Player Ranking:" | cut -c 30- )
-	rank=${rank}$(getsuffix $rank) 
-	[ "$orank" != "$rank" ] && (orank=$rank && dunstify "he is ${rank} now. copied the command" &&
+	 
+	[ "$orank" != "$rank" ] && (orank=$rank && rank=${rank}$(getsuffix $rank) && dunstify "he is ${rank} now. copied the command" &&
 	echo "!settitle hello 👋 it is me 😊 the ${rank} best beat saber player 😎 please come watch my stream 🥺" | xclip -sel clip)
 done
