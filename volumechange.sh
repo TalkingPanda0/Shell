@@ -11,4 +11,5 @@ case $1 in
 	pactl set-sink-mute @DEFAULT_SINK@ toggle && [ "$($volsh)" != "muted" ]  && msg="unmuted" arg="-i audio-volume-medium" || msg="muted" arg="-i audio-volume-muted"
 	;;
 esac
+dunstctl close
 dunstify -t 900 $arg $msg

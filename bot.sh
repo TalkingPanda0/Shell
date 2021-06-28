@@ -1,7 +1,7 @@
 #!/bin/sh
 user=76561198800357802
 getsuffix () {
-	[ $(echo $1 | rev | cut -c 2 | rev) -eq 1 ] && echo "th" && return
+	[ "$(echo $1 | rev | cut -c 2 | rev)" = "1" ] && echo "th" && return
 	case $(echo $1 | rev | cut -c 1 | rev ) in
 		1)echo "st";;
 		2)echo "nd";;
@@ -11,7 +11,7 @@ getsuffix () {
 }
 while :; do
 	rank=$(curl -s https://scoresaber.com/u/$user | grep "\"Player Ranking:" | cut -c 30- )
-	 
-	[ "$orank" != "$rank" ] && (orank=$rank && rank=${rank}$(getsuffix $rank) && dunstify "he is ${rank} now. copied the command" &&
-	echo "!settitle hello 👋 it is me 😊 the ${rank} best beat saber player 😎 please come watch my stream 🥺" | xclip -sel clip)
+	 ! [ -z "$rank" ] && [ "$orank" != "$rank" ] && orank=$rank && rank=${rank}$(getsuffix $rank) && dunstify "he is ${rank} now. copied the command" &&
+	echo "!settitle hello 👋 it is me 😊 the ${rank} best beat saber player 😎 please come watch my stream 🥺" | xclip -sel clip
 done
+! [ -z "$var" ] && echo "a"
