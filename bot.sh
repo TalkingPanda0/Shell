@@ -7,7 +7,7 @@ getsuffix () {
 		1)echo "st";;
 		2)echo "nd";;
 		3)echo "rd";;
-		[4-9])echo "th";;
+		*)echo "th";;
 	esac
 }
 while :; do

@@ -117,9 +117,10 @@ asktoend() { \
 
 case "$1" in
 	"screenshot selected") screenshotselected;;
+	screenshot) screenshot;;
 	audio) audio;;
-	video) video;;
 	"video selected") videoselected;;
+	video) video;;
 	kill) killrecording;;
 	*) ([ -f /tmp/recordingpid ] && asktoend && exit) || askrecording;;
 esac
