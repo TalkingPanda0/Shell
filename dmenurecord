@@ -22,21 +22,42 @@ killrecording() {
 	exit
 	}
 
+videoselected() {
+	output="$HOME/video-$(date '+%y%m%d-%H%M-%S').mkv" &
+	slop -f "%x %y %w %h" > /tmp/slop
+	read -r X Y W H < /tmp/slop
+	rm /tmp/slop
 
-video() { \
 	LIBVA_DRIVER_NAME=i965 \
 	ffmpeg \
 	-vaapi_device /dev/dri/renderD128 \
 	-f x11grab \
-	-s "$(xdpyinfo | grep dimensions | awk '{print $2;}')" \
+	-video_size "$W"x"$H" \
+	-i :0.0+"$X,$Y" \
+	-f alsa \
+	-i default \
+	-vf 'format=nv12,hwupload' \
+	-c:v h264_vaapi -f mp4 -rc_mode 1 \
+ 	-qp 25 -r 60 \
+	$output &
+	echo $! > /tmp/recordingpid
+	dunstify "video saved to $output"
+	}	
+video(){
+	output="$HOME/video-$(date '+%y%m%d-%H%M-%S').mkv"
+	LIBVA_DRIVER_NAME=i965 \
+	ffmpeg \
+	-vaapi_device /dev/dri/renderD128 \
+	-f x11grab \
 	-i "$DISPLAY" \
 	-f alsa \
 	-i default \
 	-vf 'format=nv12,hwupload' \
 	-c:v h264_vaapi -f mp4 -rc_mode 1 \
  	-qp 25 -r 60 \
-	"$HOME/video-$(date '+%y%m%d-%H%M-%S').mkv" &
+	$output &
 	echo $! > /tmp/recordingpid
+	dunstify "video saved to $output"
 	}
 
 
@@ -48,11 +69,43 @@ audio() { \
 	echo $! > /tmp/recordingpid
 	}
 
+screenshotselected() {
+	output="$HOME/screenshots-$(date '+%y%m%d-%H%M-%S').png"
+	slop -f "%x %y %w %h" > /tmp/slop || exit
+	read -r X Y W H < /tmp/slop
+	rm /tmp/slop
+
+	ffmpeg \
+	-f x11grab \
+	-video_size "$W"x"$H" \
+	-i :0.0+"$X,$Y" \
+	-f alsa \
+	-i default \
+	-vframes 1 \
+	$output &
+	dunstify "screenshot saved to $output"
+	}	
+screenshot() {
+	output="$HOME/screenshots-$(date '+%y%m%d-%H%M-%S').png"
+	ffmpeg \
+	-f x11grab \
+	-i "$DISPLAY" \
+	-f alsa \
+	-i default \
+	-vframes 1 \
+	$output &
+	dunstify "screenshot saved to $output"
+	}	
+
+
 askrecording() { \
-	choice=$(printf "video\\naudio" | dmenu -i -p "Select recording style:")
+	choice=$(printf "screenshot\\nscreenshot selected\\nvideo\\nvideo selected\\naudio" | dmenu -i -p "Select recording style:")
 	case "$choice" in
+		screenshot) screenshot;;
+		"screenshot selected") screenshotselected;;
 		audio) audio;;
 		video) video;;
+		"video selected") videoselected;;
 	esac
 	}
 
@@ -63,8 +116,10 @@ asktoend() { \
 
 
 case "$1" in
+	"screenshot selected") screenshotselected;;
 	audio) audio;;
 	video) video;;
+	"video selected") videoselected;;
 	kill) killrecording;;
 	*) ([ -f /tmp/recordingpid ] && asktoend && exit) || askrecording;;
 esac
